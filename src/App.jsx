@@ -1,7 +1,6 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { ThemeProvider } from 'styled-components'
 import { setColor } from './colorReducer'
 import GlobalStyle from './GlobalStyle'
 
@@ -13,6 +12,11 @@ const App = () => {
   const [isInputValid, setIsInputValid] = useState(false)
   const [message, setMessage] = useState('')
 
+  setInterval(
+    () => dispatch(setColor(localStorage.getItem('storedSelectedColor'))),
+    3000
+  )
+
   useEffect(() => {
     const getRandomHexNumber = async () => {
       const randomHexNumber = await axios.get(
@@ -22,7 +26,7 @@ const App = () => {
         .map((number) => number.toString(16))
         .join('')
 
-      // localStorage.setItem('storedSelectedColor', `#${numToHex}`)
+      localStorage.setItem('storedSelectedColor', `#${numToHex}`)
       dispatch(setColor(`#${numToHex}`))
     }
     getRandomHexNumber()
@@ -48,24 +52,23 @@ const App = () => {
     }
     e.preventDefault()
     dispatch(setColor(hexCode))
+    localStorage.setItem('storedSelectedColor', `${hexCode}`)
     setHexCode('')
     setIsInputValid(false)
   }
   return (
-    <ThemeProvider theme={{ backgroundColor: `${selectedColor}` }}>
-      <>
-        <GlobalStyle />
-        <h1>Selected color is {selectedColor}</h1>
-        <form onSubmit={handleSubmit}>
-          <input name='color' value={hexCode} onChange={handleHexCode} />
+    <>
+      <GlobalStyle background={selectedColor} />
+      <h1>Selected color is {selectedColor}</h1>
+      <form onSubmit={handleSubmit}>
+        <input name='color' value={hexCode} onChange={handleHexCode} />
 
-          {isInputValid ? (
-            <button type='submit'>Change Background Color</button>
-          ) : null}
-        </form>
-        {message}
-      </>
-    </ThemeProvider>
+        {isInputValid ? (
+          <button type='submit'>Change Background Color</button>
+        ) : null}
+      </form>
+      {message}
+    </>
   )
 }
 
